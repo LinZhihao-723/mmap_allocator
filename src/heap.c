@@ -77,7 +77,7 @@ list_node_t heap_allocate(heap_t* heap, const size_t size) {
     victim->size,
     HEAP_IDX_NULL,
     false
-  );
+  ); // Notice that this is the only place that we create new node.
   if (!ret_node) {
     // Running out of memory to allocate node...
     // But we can still return the allocated block
@@ -99,7 +99,6 @@ bool heap_free(heap_t* heap, list_node_t node) {
   // The idea is that we want to merge internal free blocks,
   // and try to avoid insert new node into the heap.
   if (node->next->is_free) {
-
     // The next block is free.
     if (node->prev->is_free) {
       // First check if the previous block is also free.
@@ -107,33 +106,35 @@ bool heap_free(heap_t* heap, list_node_t node) {
       list_node_t previous = node->prev;
       node->size += previous->size;
       node->addr = previous->addr;
-      list_remove(previous);
+      node_unlink(previous);
       heap_remove_idx(heap, previous->idx);
-      FREE((size_t) previous);
+      FREE(previous);
     }
 
     // Merge the current into next.
-    node->next->size += node->size;
-    node->next->addr = node->addr;
-    list_remove(node);
+    list_node_t next = node->next;
+    next->size += node->size;
+    next->addr = node->addr;
+    node_unlink(node);
     FREE(node);
+
+    // Restructure the heap as we increase the size of "next" node.
+    heap_heapify_up(heap, next->idx);
     return true;
 
   } else if (node->prev->is_free) {
-
     // Merge the current block into the previous.
     list_node_t previous = node->prev;
     previous->size += node->size;
-    heap_heapify_up(heap, previous->idx);
-    list_remove(node);
+    node_unlink(node);
     FREE(node);
+
+    // Restructure the heap as we increase the size of "next" node.
+    heap_heapify_up(heap, previous->idx);
     return true;
-
+    
   } else {
-
     // Nothing we can merge. Insert the current node into the heap.
-    node->is_free = true;
     return heap_insert(heap, node);
-
   }
 }

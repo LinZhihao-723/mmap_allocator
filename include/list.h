@@ -93,7 +93,7 @@ list_init(list_t* list, uint8_t* addr, const size_t size) {
 }
 
 void FORCE_INLINE 
-list_remove(list_node_t node) {
+node_unlink(list_node_t node) {
   assert(node);
   node->prev->next = node->next;
   node->next->prev = node->prev;

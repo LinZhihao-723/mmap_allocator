@@ -29,7 +29,14 @@ void heap_heapify_up(heap_t* heap, const size_t idx);
 list_node_t heap_allocate(heap_t* heap, const size_t size);
 bool heap_free(heap_t* heap, list_node_t node);
 
-bool FORCE_INLINE heap_init(heap_t* heap, list_node_t init_node) {
+void FORCE_INLINE
+heap_set_idx(heap_t* heap, const size_t idx, list_node_t node) {
+  heap->node_array[idx] = node;
+  node->idx = idx;
+}
+
+bool FORCE_INLINE 
+heap_init(heap_t* heap, list_node_t init_node) {
   list_node_t* array = 
     (list_node_t*) std_malloc(sizeof(list_node_t) * INIT_HEAP_CAPACITY);
   if (!array) {
@@ -38,7 +45,6 @@ bool FORCE_INLINE heap_init(heap_t* heap, list_node_t init_node) {
   }
 
   array[0] = NULL;
-  array[1] = init_node;
 
   *heap = (heap_t) {
     .capacity = INIT_HEAP_CAPACITY,
@@ -46,9 +52,14 @@ bool FORCE_INLINE heap_init(heap_t* heap, list_node_t init_node) {
     .node_array = array
   };
 
-  init_node->idx = 1;
+  heap_set_idx(heap, 1, init_node);
 
   return true;
+}
+
+size_t FORCE_INLINE
+heap_get_num_elements(heap_t* heap) {
+  return heap->size - 1;
 }
 
 size_t FORCE_INLINE 
@@ -63,24 +74,12 @@ heap_swap(heap_t* heap, const size_t a, const size_t b) {
   heap->node_array[b] = temp;
 }
 
-size_t FORCE_INLINE
-heap_get_num_elements(heap_t* heap) {
-  return heap->size - 1;
-}
-
-void FORCE_INLINE
-heap_set_idx(heap_t* heap, const size_t idx, list_node_t node) {
-  heap->node_array[idx] = node;
-  node->idx = idx;
-}
-
 void FORCE_INLINE
 heap_remove_idx(heap_t* heap, const size_t idx) {
   assert(idx > 0 && idx < heap->size && "Heap remove invalid idx.");
 
   heap->node_array[idx]->idx = HEAP_IDX_NULL;
   const size_t heap_elements = heap_get_num_elements(heap);
-
   if (heap_elements == idx) {
     heap->size -= 1;
     return;
