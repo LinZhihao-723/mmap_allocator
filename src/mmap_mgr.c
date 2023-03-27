@@ -1,14 +1,15 @@
 #define _GNU_SOURCE // To enable various non-standard GNU extensions.
+#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdio.h>
 
 #include "constants.h"
 #include "mmap_mgr.h"
+#include "std_binding.h"
 
 /*
 This function will reserve a region for later mmap use.

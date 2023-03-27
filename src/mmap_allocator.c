@@ -1,18 +1,19 @@
-#define _GNU_SOURCE
+#define _GNU_SOURCE // To enable various non-standard GNU extensions.
 #include <assert.h>
 #include <dlfcn.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <string.h>
 #include <errno.h>
+#include <pthread.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "constants.h"
 #include "heap.h"
 #include "list.h"
 #include "mmap_mgr.h"
+#include "std_binding.h"
 
 #define OUT_OF_MEMORY() do { \
   fprintf(stderr, "Out of space. Failed to allocate more memory.\n"); \

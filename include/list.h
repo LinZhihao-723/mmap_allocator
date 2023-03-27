@@ -1,11 +1,12 @@
 #ifndef LIST_H
 #define LIST_H
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include "constants.h"
+#include "std_binding.h"
 
 typedef struct list_node_base {
   struct list_node_base* prev;
