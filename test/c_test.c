@@ -1,15 +1,19 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <omp.h>
+#include <pthread.h>
+#include <stdbool.h>
 
-#define BATCH_SIZE 13
+#define BATCH_SIZE 5
 #define MALLOC_SIZE_MAX (1024 * 1024 * 256)
 #define BASE_SIZE (1024 * 1024)
 
 #define REALLOC_TEST 1
-#define TEST_TIME 100
+#define TEST_TIME 10
 
-int main() {
-  srand(3190);
+#define TESTING_THREAD 16
+
+int test() {
   int* addrs[BATCH_SIZE];
   size_t size_list[BATCH_SIZE];
   size_t resize_list[BATCH_SIZE];
@@ -53,13 +57,36 @@ int main() {
         if (addrs[j][k] != j * 3 + k) {
           fprintf(stderr, "Batch #%d failed: %d\n", j, k);
           fprintf(stderr, "Expected: %d; Real: %d\n", j * 3 + k, addrs[j][k]);
-          return -1;
+          return 1;
         }
       }
       free(addrs[j]);
     }
   }
 
-  fprintf(stderr, "Test Finished. You are all good :)\n");
   return 0;
+}
+
+int main() {
+  srand(3190);
+
+  int result[TESTING_THREAD];
+
+  #pragma omp parallel for
+  for (int i = 0; i < TESTING_THREAD; ++i) {
+    result[i] = test();
+  }
+
+  int retval = 0;
+  for (int i = 0; i < TESTING_THREAD; ++i) {
+    retval += result[i];
+  }
+
+  if (retval) {
+    fprintf(stderr, "Test Finished. Failed :(\n");
+  } else {
+    fprintf(stderr, "Test Finished. You are all good :)\n");
+  }
+
+  return retval;
 }

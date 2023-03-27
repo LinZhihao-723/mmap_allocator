@@ -1,3 +1,4 @@
 .vscode
 compile_commands*
 build
+*.exe
