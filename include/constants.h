@@ -6,7 +6,7 @@
 #include <stdlib.h>
 
 #define FORCE_INLINE inline __attribute__((always_inline))
-typedef uint64_t SIZE_T;
+#define LOCAL_HELPER static inline
 
 extern void* (*std_malloc)(size_t);
 extern void *(*std_calloc)(size_t, size_t);

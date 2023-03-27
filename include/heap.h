@@ -20,6 +20,7 @@
 typedef struct heap {
   size_t capacity;
   size_t size;
+  list_t node_list;
   list_node_t* node_array;
 } heap_t;
 
@@ -36,7 +37,7 @@ heap_set_idx(heap_t* heap, const size_t idx, list_node_t node) {
 }
 
 bool FORCE_INLINE 
-heap_init(heap_t* heap, list_node_t init_node) {
+heap_init(heap_t* heap, uint8_t* addr, const size_t size) {
   list_node_t* array = 
     (list_node_t*) std_malloc(sizeof(list_node_t) * INIT_HEAP_CAPACITY);
   if (!array) {
@@ -52,7 +53,13 @@ heap_init(heap_t* heap, list_node_t init_node) {
     .node_array = array
   };
 
-  heap_set_idx(heap, 1, init_node);
+  if (!list_init(&(heap->node_list), addr, size)) {
+    FREE(array);
+    return false;
+  }
+
+  list_node_t head = heap->node_list.virtual_head->next;
+  heap_set_idx(heap, 1, head);
 
   return true;
 }
