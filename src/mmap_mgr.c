@@ -1,9 +1,11 @@
 #define _GNU_SOURCE // To enable various non-standard GNU extensions.
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "constants.h"
 #include "mmap_mgr.h"
@@ -26,7 +28,7 @@ int mmap_maptemp(void* addr, const size_t size, char* template) {
     return -1;
   }
   strcpy(filename, template);
-  const int fd = mkstemp(filename);
+  int fd = mkstemp(filename);
   if (fd < 0) {
     FREE(filename);
     return -2;
@@ -37,12 +39,13 @@ int mmap_maptemp(void* addr, const size_t size, char* template) {
   int retval;
   retval = unlink(filename);
   FREE(filename);
-  if (!retval) {
+  if (retval) {
     return -3;
   }
   // Resize the file to ensure we have enough space.
   retval = ftruncate(fd, size);
-  if (retval != 0) {
+  if (retval) {
+    fprintf(stderr, "ftruncate failed! %s. Size: %ld\n", strerror(errno), size);
     return -4;
   }
 

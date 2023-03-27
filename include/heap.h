@@ -76,22 +76,56 @@ heap_compare_GT(heap_t* heap, const size_t l, const size_t r) {
 
 void FORCE_INLINE 
 heap_swap(heap_t* heap, const size_t a, const size_t b) {
+  heap->node_array[a]->idx = b;
+  heap->node_array[b]->idx = a;
   list_node_t temp = heap->node_array[a];
   heap->node_array[a] = heap->node_array[b];
   heap->node_array[b] = temp;
 }
 
 void FORCE_INLINE
-heap_remove_idx(heap_t* heap, const size_t idx) {
-  assert(idx > 0 && idx < heap->size && "Heap remove invalid idx.");
+heap_check(heap_t* heap) {
+#if DEBUG_HEAP
+  list_t* list = &heap->node_list;
+  assert(!list->virtual_head->is_free && "Virtual head is dirty.");
+  assert(!list->virtual_tail->is_free && "Virtual tail is dirty.");
+  list_node_t curr = list->virtual_head->next;
+  list_node_t end = list->virtual_tail;
+  while (curr != end) {
+    assert(curr);
+    if (curr->is_free) {
+      if (!(curr->idx > 0 && curr->idx < heap->size)) {
+        fprintf(stderr, "Idx: %ld; Addr: %p\n", curr->idx, curr);
+        assert(0 && "Out of bound!");
+      }
+    } else {
+      assert(curr->idx == 0 && "Invalid null heap idx.");
+    }
+    curr = curr->next;
+  }
+  for (int i = 1; i < heap->size; ++i) {
+    assert(heap->node_array[i] && "Node array being NULL.");
+    assert(heap->node_array[i]->is_free && "Heap not clean.");
+    assert(heap->node_array[i]->idx == i && "Idx mismatch.");
+  }
+#endif
+}
 
-  heap->node_array[idx]->idx = HEAP_IDX_NULL;
+void FORCE_INLINE
+heap_remove_idx(heap_t* heap, const size_t idx) {
+  if (!(idx > 0 && idx < heap->size && "Heap remove invalid idx.")) {
+    fprintf(stderr, "idx: %ld\n", idx);
+    assert(0);
+  }
+
   const size_t heap_elements = heap_get_num_elements(heap);
   if (heap_elements == idx) {
     heap->size -= 1;
+    heap->node_array[idx]->idx = HEAP_IDX_NULL;
     return;
   }
 
+  heap->node_array[idx]->idx = HEAP_IDX_NULL;
   heap_set_idx(heap, idx, heap->node_array[heap->size - 1]);
   heap->size -= 1;
   heap_heapify_down(heap, idx);
@@ -106,7 +140,6 @@ heap_get_root(heap_t* heap) {
 }
 
 // Insert a new node to the heap with heap property maintained.
-// Return 0 for success.
 bool FORCE_INLINE
 heap_insert(heap_t* heap, list_node_t node) {
   if (heap->size == heap->capacity) {
@@ -131,7 +164,7 @@ heap_insert(heap_t* heap, list_node_t node) {
   heap->size += 1;
   heap_heapify_up(heap, node->idx);
 
-  return 0;
+  return true;
 }
 
 #endif

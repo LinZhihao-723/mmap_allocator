@@ -95,6 +95,7 @@ list_init(list_t* list, uint8_t* addr, const size_t size) {
 void FORCE_INLINE 
 node_unlink(list_node_t node) {
   assert(node);
+  assert(node->next != node->prev->next && "WTF???");
   node->prev->next = node->next;
   node->next->prev = node->prev;
   node->prev = node->next = NULL;
@@ -102,8 +103,8 @@ node_unlink(list_node_t node) {
 
 list_node_t FORCE_INLINE 
 list_find_in_use(list_t* list, uint8_t* addr) {
- list_node_t curr = list->virtual_head->next;
- list_node_t end = list->virtual_tail;
+  list_node_t curr = list->virtual_head->next;
+  list_node_t end = list->virtual_tail;
   while (curr != end) {
     assert(curr);
     if (addr == curr->addr) {

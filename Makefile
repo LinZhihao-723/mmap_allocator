@@ -1,6 +1,9 @@
 CC = gcc
-CFLAGS = -Wall -O3 -fPIC
+CFLAGS = -O3
+OFLAGS = -Wall -fPIC 
 LDFLAGS = -shared
+
+# gdb: set env LD_PRELOAD=/home/lzh/mmap_allocator/build/lib/libmmap_allocator.so
 
 # Define the source and include directories
 SRC_DIR = src
@@ -28,12 +31,12 @@ ISO_FILE = mmap_allocator.so
 # Build the library
 $(LIB_DIR)/lib$(LIB_NAME).so: $(OBJ_FILES)
 	mkdir -p $(LIB_DIR)
-	$(CC) $(LDFLAGS) -o $@ $<
+	$(CC) $(LDFLAGS) -o $@ $^
 
 # Build the object files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(LIB_HDRS)
 	mkdir -p $(OBJ_DIR)
-	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+	$(CC) $(CFLAGS) $(OFLAGS) $(INC) -c $< -o $@
 
 print-%:
 	@echo $*=$($*)

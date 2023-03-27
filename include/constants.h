@@ -16,4 +16,7 @@ extern void *(*std_reallocarray)(void *, size_t, size_t);
 
 #define FREE(x) (std_free((size_t) (x)))
 
+#define DEBUG_HEAP 1
+#define DEBUG_LIST 0
+
 #endif
