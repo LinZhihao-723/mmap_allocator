@@ -1,0 +1,19 @@
+This is a mmap based memory allocator, allow users to allocate dynamic memory in mmap region 
+instead of heap, initially inspired by BigMaac allocator.
+Processes which do not have enough swap space (such as processes running in an access-limited 
+container) will benefit from swapping through kernel managed file cache.
+
+The allocator is compiled as a linux dynamic library. You can use:
+% LD_PRELOAD=$PATH_TO_LIB executable arguments
+to execute whatever you want and replace the std allocator by the mmap allocator.
+
+To build the library:
+% make all
+
+The path to the compiled library:
+$PROJECT_PATH/build/lib/libmmap_allocator.so
+
+Configurable environment variables:
+ENV_MMAP_HEAP_SIZE: max mmap heap size, must be page aligned.
+ENV_MMAP_ALLOCATOR_MIN_BSIZE: min block size which will be allocated in mmap region.
+ENV_NAMING_TEMPLATE: path to the temp mmap files (invisible from fs during the runtime).
