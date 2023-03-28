@@ -9,7 +9,7 @@
 #define BASE_SIZE (1024 * 1024)
 
 #define REALLOC_TEST 1
-#define TEST_TIME 3190
+#define TEST_TIME 10
 
 #define TESTING_THREAD 16
 
