@@ -4,14 +4,14 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define BATCH_SIZE 5
-#define MALLOC_SIZE_MAX (1024 * 1024 * 32)
+#define BATCH_SIZE 8
+#define MALLOC_SIZE_MAX (1024 * 1024 * 256)
 #define BASE_SIZE (1024 * 1024)
 
 #define REALLOC_TEST 1
 #define TEST_TIME 100
 
-#define TESTING_THREAD 8
+#define TESTING_THREAD 16
 
 #define PARALLEL_TEST 1
 

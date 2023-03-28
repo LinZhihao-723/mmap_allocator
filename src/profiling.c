@@ -22,7 +22,7 @@ void* profile_thread_entry(void* arg) {
     size_t curr_num_block = num_mmap_file;
     PROFILE_LOCK_RELEASE();
 
-    fprintf(profile_file, "<timestamp> %s", ctime(&curr));
+    fprintf(profile_file, "<timestamp> %ld\n", curr);
     fprintf(profile_file, "<# mmap blocks> %ld\n", curr_num_block);
     fprintf(
       profile_file, 
