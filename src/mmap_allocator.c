@@ -16,12 +16,14 @@
 #include "mmap_mgr.h"
 #include "std_binding.h"
 
+/*---------------------------------------------------------------------------*/
+// Out of memory.
 #define OUT_OF_MEMORY() do { \
   fprintf(stderr, "Out of space. Failed to allocate more memory.\n"); \
   errno = ENOMEM; \
 } while (0)
 
-/******************************************************************************/
+/*---------------------------------------------------------------------------*/
 // Allocator status
 enum allocator_status {
   FAILED_TO_LOAD = -1,
@@ -30,7 +32,7 @@ enum allocator_status {
 };
 static enum allocator_status allocator_status = NOT_LOADED;
 
-/******************************************************************************/
+/*---------------------------------------------------------------------------*/
 // References binding to the original stdlib functions.
 void* (*std_malloc)(size_t) = NULL;
 void *(*std_calloc)(size_t, size_t) = NULL;
@@ -38,7 +40,7 @@ void *(*std_free)(size_t) = NULL;
 void *(*std_realloc)(void *, size_t) = NULL;
 void *(*std_reallocarray)(void *, size_t, size_t) = NULL;
 
-/******************************************************************************/
+/*---------------------------------------------------------------------------*/
 // Global lock.
 static pthread_mutex_t glock = PTHREAD_MUTEX_INITIALIZER;
 
@@ -50,7 +52,7 @@ static pthread_mutex_t glock = PTHREAD_MUTEX_INITIALIZER;
   pthread_mutex_unlock(&glock);\
 } while (0)
 
-/******************************************************************************/
+/*---------------------------------------------------------------------------*/
 // Parameters
 
 // Fixed
@@ -64,7 +66,7 @@ static char naming_template[MAX_NAMING_TEMPLATE_SIZE + 1] = {0};
 
 #define CEILING_PAGE_SIZE(size) (((size) + (page_size - 1)) & ~(page_size - 1))
 
-/******************************************************************************/
+/*---------------------------------------------------------------------------*/
 // Heap
 heap_t mmap_heap;
 
@@ -131,8 +133,9 @@ config_parameters() {
   return true;
 }
 
-/******************************************************************************/
-// Allocate from mmap_heap
+/*---------------------------------------------------------------------------*/
+// Allocator API from mmap_heap
+
 LOCAL_HELPER void mmap_allocator_init() {
   GLOBAL_LOCK_ACQUIRE();
   if (allocator_status != NOT_LOADED) {
@@ -284,13 +287,15 @@ LOCAL_HELPER bool mmap_release_with_copy(
   return true;
 }
 
-/******************************************************************************/
+/*---------------------------------------------------------------------------*/
 // User library interface
 void* malloc(size_t size);
 void* calloc(size_t num_elements, size_t element_size);
 void* reallocarray(void *addr, size_t size, size_t count);
 void* realloc(void *addr, size_t size);
 
+/*---------------------------------------------------------------------------*/
+// malloc implementation
 void* malloc(size_t size) {
   if (allocator_status == NOT_LOADED && !std_malloc) {
     mmap_allocator_init();
@@ -308,6 +313,8 @@ void* malloc(size_t size) {
   return ret;
 }
 
+/*---------------------------------------------------------------------------*/
+// calloc implementation
 void* calloc(size_t num_elements, size_t element_size) {
   if (allocator_status == NOT_LOADED && !std_calloc) {
     mmap_allocator_init();
@@ -327,10 +334,14 @@ void* calloc(size_t num_elements, size_t element_size) {
   return ret;
 }
 
+/*---------------------------------------------------------------------------*/
+// reallocarray implementation
 void* reallocarray(void *addr, size_t size, size_t count) {
   return realloc(addr, size * count);
 }
 
+/*---------------------------------------------------------------------------*/
+// realloc implementation
 void* realloc(void *addr, size_t size) {
   if (!addr) return malloc(size); // It should behave like malloc.
 
@@ -399,6 +410,8 @@ void* realloc(void *addr, size_t size) {
   return new_region;
 }
 
+/*---------------------------------------------------------------------------*/
+// free implementation
 void free(void* addr) {
   if (!addr) return;
 
