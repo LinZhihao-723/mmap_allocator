@@ -15,8 +15,14 @@ Python script using numpy that calls malloc.
 Inherited from https://github.com/misko/bigmaac
 
 Build the test:
+```sh
 make all
+```
 
 Run the test:
+```sh
 LD_PRELOAD=$PATH_TO_YOUR_LIB xxx.exe
 LD_PRELOAD=$PATH_TO_YOUR_LIB python3 xxx.py
+```
+
+Some ref number for testing env: 1TB = 1099511627776
