@@ -63,6 +63,19 @@ static void* mmap_region_base = NULL;
 // Heap
 heap_t mmap_heap;
 
+// Wrapper for heap check. 
+// Notice that heap check should acquire the global heap lock.
+// Be aware of dead lock. Don't die!
+#if DEBUG_HEAP
+#define HEAP_CHECK() do {\
+  GLOBAL_LOCK_ACQUIRE();\
+  heap_check(&mmap_heap);\
+  GLOBAL_LOCK_RELEASE();\
+} while (0)
+#else
+#define HEAP_CHECK() do {} while (0)
+#endif
+
 /******************************************************************************/
 // Allocate from mmap_heap
 LOCAL_HELPER void mmap_allocator_init() {
@@ -117,7 +130,6 @@ LOCAL_HELPER void mmap_allocator_init() {
 }
 
 LOCAL_HELPER void* mmap_allocate(size_t size) {
-  heap_check(&mmap_heap);
   if (size == 0) {
     // Ideally will never happen.
     return NULL;
@@ -229,7 +241,7 @@ void* malloc(size_t size) {
   if (!ret) {
     OUT_OF_MEMORY();
   }
-  heap_check(&mmap_heap);
+  HEAP_CHECK();
   return ret;
 }
 
@@ -294,7 +306,7 @@ void* realloc(void *addr, size_t size) {
       return NULL;
     }
 
-    heap_check(&mmap_heap);
+    HEAP_CHECK();
     return new_region;
   }
 
@@ -320,7 +332,7 @@ void* realloc(void *addr, size_t size) {
   memcpy(new_region, realloc_buffer, size);
   FREE(realloc_buffer);
 
-  heap_check(&mmap_heap);
+  HEAP_CHECK();
   return new_region;
 }
 
@@ -339,5 +351,5 @@ void free(void* addr) {
   if (!mmap_release(addr)) {
     fprintf(stderr, "Failed to free at addr: %p\n", addr);
   }
-  heap_check(&mmap_heap);
+  HEAP_CHECK();
 }

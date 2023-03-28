@@ -2,6 +2,7 @@
 #define HEAP_H
 
 #include <stdbool.h>
+#include <pthread.h>
 
 #include "constants.h"
 #include "list.h"

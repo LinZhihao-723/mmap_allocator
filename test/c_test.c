@@ -4,14 +4,16 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define BATCH_SIZE 5
-#define MALLOC_SIZE_MAX (1024 * 1024 * 256)
+#define BATCH_SIZE 3
+#define MALLOC_SIZE_MAX (1024 * 1024 * 32)
 #define BASE_SIZE (1024 * 1024)
 
 #define REALLOC_TEST 1
-#define TEST_TIME 10
+#define TEST_TIME 3190
 
 #define TESTING_THREAD 16
+
+#define PARALLEL_TEST 1
 
 int test() {
   int* addrs[BATCH_SIZE];
@@ -72,7 +74,9 @@ int main() {
 
   int result[TESTING_THREAD];
 
+#if PARALLEL_TEST
   #pragma omp parallel for
+#endif
   for (int i = 0; i < TESTING_THREAD; ++i) {
     result[i] = test();
   }
