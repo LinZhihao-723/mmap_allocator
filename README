@@ -17,3 +17,5 @@ Configurable environment variables:
 ENV_MMAP_HEAP_SIZE: max mmap heap size, must be page aligned.
 ENV_MMAP_ALLOCATOR_MIN_BSIZE: min block size which will be allocated in mmap region.
 ENV_NAMING_TEMPLATE: path to the temp mmap files (invisible from fs during the runtime).
+ENV_PROFILE_FILE_PATH: path to the profile file. Given this parameter to turn on the profiling.
+ENV_PROFILE_FREQUENCY: profiling frequency in seconds.

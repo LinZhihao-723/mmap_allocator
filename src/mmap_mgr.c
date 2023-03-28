@@ -9,6 +9,7 @@
 
 #include "constants.h"
 #include "mmap_mgr.h"
+#include "profiling.h"
 #include "std_binding.h"
 
 /*
@@ -62,6 +63,8 @@ int mmap_maptemp(void* addr, const size_t size, char* template) {
     return -5;
   }
 
+  profile_allocate(size);
+  
   retval = close(fd);
   if (retval) {
     return -6;
@@ -82,5 +85,7 @@ int mmap_unmap(void* addr, const size_t size) {
   if (ret_addr == MAP_FAILED) {
     return -1;
   }
+
+  profile_deallocate(size);
   return 0;
 }

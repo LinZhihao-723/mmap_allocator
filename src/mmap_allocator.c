@@ -15,6 +15,7 @@
 #include "list.h"
 #include "mmap_mgr.h"
 #include "std_binding.h"
+#include "profiling.h"
 
 /*---------------------------------------------------------------------------*/
 // Out of memory.
@@ -130,6 +131,32 @@ config_parameters() {
     mmap_alloctor_min_bsize = default_mmap_alloctor_min_bsize;
   }
 
+  const char* env_profile = getenv(env_profile_file_path);
+  if (env_profile) {
+    profile_file = fopen(env_profile, "a");
+    if (!profile_file) {
+      fprintf(
+        stderr,
+        "Failed tp open the profile file in path: %s\n",
+        env_profile
+      );
+      return false;
+    }
+  }
+
+  const char* env_profile_freq = getenv(env_profile_frequency);
+  if (env_profile_freq) {
+    profile_frequency = (size_t) strtoull(env_profile_freq, NULL, 10);
+    if (profile_frequency == 0) {
+      fprintf(
+        stderr, 
+        "Config error: %s cannot be zero.\n", 
+        env_mmap_alloctor_min_bsize
+      );
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -166,11 +193,23 @@ LOCAL_HELPER void mmap_allocator_init() {
   // Initialize page size.
   page_size = sysconf(_SC_PAGE_SIZE);
 
+  // Read environment variables
   if (!config_parameters()) {
     fprintf(stderr, "Failed to configure parameters from env.\n");
     allocator_status = FAILED_TO_LOAD;
     GLOBAL_LOCK_RELEASE();
     return;
+  }
+
+  // Configure profiling
+  if (profile_file) {
+    pthread_t profile_thread;
+    if (pthread_create(&profile_thread, NULL, profile_thread_entry, NULL)) {
+      fprintf(stderr, "Profiling thread init failed.\n");
+      allocator_status = FAILED_TO_LOAD;
+      GLOBAL_LOCK_RELEASE();
+      return;
+    }
   }
 
   // Reserve mmap region.
@@ -237,7 +276,8 @@ LOCAL_HELPER bool mmap_release(void* addr) {
   }
 
   // Unmap the region.
-  if (mmap_unmap(addr, block->size)) {
+  const int retval = mmap_unmap(addr, block->size);
+  if (0 != retval) {
     fprintf(stderr, "Failed to unmap the region.\n");
     GLOBAL_LOCK_RELEASE();
     return false;
