@@ -109,7 +109,7 @@ list_find_in_use(list_t* list, uint8_t* addr) {
   while (curr != end) {
     assert(curr);
     if (addr == curr->addr) {
-      assert(!curr->is_free && "Find matched address being set to free");
+      assert(!curr->is_free && "Double free detected...");
       return curr;
     }
     curr = curr->next;

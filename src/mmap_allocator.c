@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "constants.h"
+#include "default_config.h"
 #include "heap.h"
 #include "list.h"
 #include "mmap_mgr.h"
@@ -51,11 +52,15 @@ static pthread_mutex_t glock = PTHREAD_MUTEX_INITIALIZER;
 
 /******************************************************************************/
 // Parameters
+
+// Fixed
 static size_t page_size = 0;
-static size_t mmap_region_size = (size_t) 1024 * 1024 * 1024 * 512; // 512GB
-static size_t mmap_alloctor_min_size = 1024 * 1024 * 4;
-static char* naming_template = "/tmp/mmap_alloc.XXXXXXXX";
 static void* mmap_region_base = NULL;
+
+// Configurable
+static size_t mmap_heap_size = 0;
+static size_t mmap_alloctor_min_bsize = 0;
+static char naming_template[MAX_NAMING_TEMPLATE_SIZE + 1] = {0};
 
 #define CEILING_PAGE_SIZE(size) (((size) + (page_size - 1)) & ~(page_size - 1))
 
@@ -75,6 +80,56 @@ heap_t mmap_heap;
 #else
 #define HEAP_CHECK() do {} while (0)
 #endif
+
+bool LOCAL_HELPER
+config_parameters() {
+  assert(page_size && "Page size should be initialized.");
+
+  const char* env_template = getenv(env_naming_template);
+  if (env_template) {
+    if (strlen(env_template) > MAX_NAMING_TEMPLATE_SIZE) {
+      fprintf(stderr, "Config error: %s is too long. ", env_naming_template);
+      fprintf(stderr, "Max acceptable size: %d\n", MAX_NAMING_TEMPLATE_SIZE);
+      return false;
+    }
+    strcpy(naming_template, env_template);
+  } else {
+    strcpy(naming_template, default_naming_template);
+  }
+
+  const char* evn_size = getenv(env_mmap_heap_size);
+  if (evn_size) {
+    mmap_heap_size = (size_t) strtoull(evn_size, NULL, 10);
+    if (mmap_heap_size % page_size != 0) {
+      fprintf(
+        stderr, 
+        "Config error: %s is not page aligned. Page size: %ld\n", 
+        env_mmap_heap_size, 
+        page_size
+      );
+      return false;
+    }
+  } else {
+    mmap_heap_size = default_mmap_heap_size;
+  }
+
+  const char* evn_bsize = getenv(env_mmap_alloctor_min_bsize);
+  if (evn_bsize) {
+    mmap_alloctor_min_bsize = (size_t) strtoull(evn_bsize, NULL, 10);
+    if (mmap_alloctor_min_bsize > mmap_heap_size) {
+      fprintf(
+        stderr, 
+        "Config error: %s is not larger than the heap size.\n", 
+        env_mmap_alloctor_min_bsize
+      );
+      return false;
+    }
+  } else {
+    mmap_alloctor_min_bsize = default_mmap_alloctor_min_bsize;
+  }
+
+  return true;
+}
 
 /******************************************************************************/
 // Allocate from mmap_heap
@@ -108,8 +163,15 @@ LOCAL_HELPER void mmap_allocator_init() {
   // Initialize page size.
   page_size = sysconf(_SC_PAGE_SIZE);
 
+  if (!config_parameters()) {
+    fprintf(stderr, "Failed to configure parameters from env.\n");
+    allocator_status = FAILED_TO_LOAD;
+    GLOBAL_LOCK_RELEASE();
+    return;
+  }
+
   // Reserve mmap region.
-  mmap_region_base = mmap_reserve(mmap_region_size);
+  mmap_region_base = mmap_reserve(mmap_heap_size);
   if (!mmap_region_base) {
     // Failed to reserve the mmap region.
     fprintf(stderr, "Failed to reserve mmap alloctor region.\n");
@@ -119,12 +181,13 @@ LOCAL_HELPER void mmap_allocator_init() {
   }
 
   // Initialize mmap heap.
-  if (!heap_init(&mmap_heap, mmap_region_base, mmap_region_size)) {
+  if (!heap_init(&mmap_heap, mmap_region_base, mmap_heap_size)) {
     allocator_status = FAILED_TO_LOAD;
     GLOBAL_LOCK_RELEASE();
     return;
   }
 
+  fprintf(stderr, "MMap Allocator is successfully loaded.\n");
   allocator_status = LOADED;
   GLOBAL_LOCK_RELEASE();
 }
@@ -233,7 +296,7 @@ void* malloc(size_t size) {
     mmap_allocator_init();
   }
 
-  if (allocator_status != LOADED || size < mmap_alloctor_min_size) {
+  if (allocator_status != LOADED || size < mmap_alloctor_min_bsize) {
     return std_malloc(size);
   }
 
@@ -251,7 +314,7 @@ void* calloc(size_t num_elements, size_t element_size) {
   }
 
   const size_t total_size = num_elements * element_size;
-  if (allocator_status != LOADED || total_size < mmap_alloctor_min_size) {
+  if (allocator_status != LOADED || total_size < mmap_alloctor_min_bsize) {
     return std_calloc(num_elements, element_size);
   }
 
@@ -317,7 +380,7 @@ void* realloc(void *addr, size_t size) {
     return NULL;
   }
 
-  if (size < mmap_alloctor_min_size) {
+  if (size < mmap_alloctor_min_bsize) {
     return realloc_buffer;
   }
 

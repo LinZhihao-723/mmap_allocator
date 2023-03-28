@@ -60,7 +60,7 @@ heap_remove_idx(heap_t* heap, const size_t idx) {
 
 list_node_t LOCAL_HELPER
 heap_get_root(heap_t* heap) {
-  if (heap->size < HEAP_IDX_ROOT) {
+  if (heap->size <= HEAP_IDX_ROOT) {
     return NULL;
   }
   return heap->node_array[HEAP_IDX_ROOT];
@@ -130,6 +130,11 @@ static void heap_heapify_up(heap_t* heap, const size_t idx) {
 list_node_t heap_allocate(heap_t* heap, const size_t size) {
   list_node_t root = heap_get_root(heap);
   if (!root) {
+    return NULL;
+  }
+
+  if (size > root->size) {
+    // The required size is larger than the largest block size.
     return NULL;
   }
 
