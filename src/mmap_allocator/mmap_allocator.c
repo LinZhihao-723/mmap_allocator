@@ -229,7 +229,7 @@ LOCAL_HELPER void mmap_allocator_init() {
     return;
   }
 
-  fprintf(stderr, "MMap Allocator is successfully loaded.\n");
+  fprintf(stderr, "MMap Allocator is successfully loaded. Base address: %p\n", mmap_region_base);
   allocator_status = LOADED;
   GLOBAL_LOCK_RELEASE();
 }
