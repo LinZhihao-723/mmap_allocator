@@ -1,4 +1,4 @@
-#include <mmap_allocator/default_config.h>
+#include "default_config.h"
 
 char* const env_mmap_heap_size = "ENV_MMAP_HEAP_SIZE";
 char* const env_mmap_alloctor_min_bsize = "ENV_MMAP_ALLOCATOR_MIN_BSIZE";

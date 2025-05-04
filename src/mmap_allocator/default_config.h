@@ -1,5 +1,5 @@
-#ifndef DEFAULT_CONFIG_H
-#define DEFAULT_CONFIG_H
+#ifndef MMAP_ALLOCATOR_DEFAULT_CONFIG_H
+#define MMAP_ALLOCATOR_DEFAULT_CONFIG_H
 
 #include <stdlib.h>
 

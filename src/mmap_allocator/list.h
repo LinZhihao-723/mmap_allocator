@@ -1,5 +1,5 @@
-#ifndef LIST_H
-#define LIST_H
+#ifndef MMAP_ALLOCATOR_LIST_H
+#define MMAP_ALLOCATOR_LIST_H
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -1,4 +1,6 @@
 #define _GNU_SOURCE // To enable various non-standard GNU extensions.
+#include "mmap_mgr.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +10,6 @@
 #include <unistd.h>
 
 #include <mmap_allocator/constants.h>
-#include <mmap_allocator/mmap_mgr.h>
 #include <mmap_allocator/profiling.h>
 #include <mmap_allocator/std_binding.h>
 

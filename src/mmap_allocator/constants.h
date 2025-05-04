@@ -1,5 +1,5 @@
-#ifndef CONSTANTS_H
-#define CONSTANTS_H
+#ifndef MMAP_ALLOCATOR_CONSTANTS_H
+#define MMAP_ALLOCATOR_CONSTANTS_H
 
 #include <assert.h>
 #include <stdint.h>

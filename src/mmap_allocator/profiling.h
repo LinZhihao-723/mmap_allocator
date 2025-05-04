@@ -1,5 +1,5 @@
-#ifndef PROFILING_H
-#define PROFILING_H
+#ifndef MMAP_ALLOCATOR_PROFILING_H
+#define MMAP_ALLOCATOR_PROFILING_H
 
 #include <stdbool.h>
 #include <stdlib.h>

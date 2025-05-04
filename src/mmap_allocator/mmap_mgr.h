@@ -1,5 +1,5 @@
-#ifndef MMAP_MGR_H
-#define MMAP_MGR_H
+#ifndef MMAP_ALLOCATOR_MMAP_MGR_H
+#define MMAP_ALLOCATOR_MMAP_MGR_H
 
 #include <stdlib.h>
 

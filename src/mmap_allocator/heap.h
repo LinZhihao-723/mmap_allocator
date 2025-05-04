@@ -1,5 +1,5 @@
-#ifndef HEAP_H
-#define HEAP_H
+#ifndef MMAP_ALLOCATOR_HEAP_H
+#define MMAP_ALLOCATOR_HEAP_H
 
 #include <stdbool.h>
 #include <pthread.h>
