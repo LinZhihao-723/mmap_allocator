@@ -40,4 +40,4 @@ jobs:
           python3 -m pip install numpy && \
           LD_PRELOAD=./build/libmmap_allocator.so \
           ENV_MMAP_HEAP_SIZE=5049942016 \
-          python3 numpy_test.py
+          python3 test/numpy_test.py
