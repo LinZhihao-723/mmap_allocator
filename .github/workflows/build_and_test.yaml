@@ -14,7 +14,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: ["macos-latest", "ubuntu-jammy"]
+        os: ["ubuntu-jammy"]
     runs-on: "${{matrix.os}}"
     steps:
       - uses: "actions/checkout@v4"
