@@ -6,8 +6,8 @@
 #include <stdio.h>
 #include <pthread.h>
 
-#include "constants.h"
-#include "default_config.h"
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/default_config.h>
 
 extern pthread_mutex_t profile_lock;
 extern FILE* profile_file;

@@ -1,9 +1,9 @@
 #include <assert.h>
 #include <stdio.h>
 
-#include "heap.h"
-#include "list.h"
-#include "std_binding.h"
+#include <mmap_allocator/heap.h>
+#include <mmap_allocator/list.h>
+#include <mmap_allocator/std_binding.h>
 
 /*
 Since these functions are recursive, they cannot be inlined. 

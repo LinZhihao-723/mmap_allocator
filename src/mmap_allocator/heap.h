@@ -4,9 +4,12 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include "constants.h"
 #include "list.h"
 #include "std_binding.h"
+
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/list.h>
+#include <mmap_allocator/std_binding.h>
 
 #define INIT_HEAP_CAPACITY 8
 

@@ -7,10 +7,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "constants.h"
-#include "mmap_mgr.h"
-#include "profiling.h"
-#include "std_binding.h"
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/mmap_mgr.h>
+#include <mmap_allocator/profiling.h>
+#include <mmap_allocator/std_binding.h>
 
 /*
 This function will reserve a region for later mmap use.

@@ -2,7 +2,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "profiling.h"
+#include <mmap_allocator/profiling.h>
 
 pthread_mutex_t profile_lock = PTHREAD_MUTEX_INITIALIZER;
 FILE* profile_file = NULL;
