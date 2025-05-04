@@ -1,0 +1,43 @@
+name: "Build And Test"
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: "${{github.workflow}}-${{github.ref}}"
+  # Cancel in-progress jobs for efficiency
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: ["macos-latest", "ubuntu-jammy"]
+    runs-on: "${{matrix.os}}"
+    steps:
+      - uses: "actions/checkout@v4"
+
+      - name: "Build"
+        run: |
+          cmake -S . -B build
+          cmake --build build
+
+      - name: "Compile test cases"
+        run: |
+          cd test
+          make -j all
+
+      - name: "Run `c_test`"
+        run: |
+          LD_PRELOAD=./build/libmmap_allocator.so \
+          ENV_MMAP_HEAP_SIZE=5049942016 \
+          ./test/c_test.exe
+
+      - name: "Run `numpy_test`"
+        run: |
+          python3 -m pip install numpy && \
+          LD_PRELOAD=./build/libmmap_allocator.so \
+          ENV_MMAP_HEAP_SIZE=5049942016 \
+          python3 numpy_test.py
