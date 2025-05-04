@@ -9,13 +9,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "constants.h"
-#include "default_config.h"
-#include "heap.h"
-#include "list.h"
-#include "mmap_mgr.h"
-#include "std_binding.h"
-#include "profiling.h"
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/default_config.h>
+#include <mmap_allocator/heap.h>
+#include <mmap_allocator/list.h>
+#include <mmap_allocator/mmap_mgr.h>
+#include <mmap_allocator/std_binding.h>
+#include <mmap_allocator/profiling.h>
 
 /*---------------------------------------------------------------------------*/
 // Out of memory.

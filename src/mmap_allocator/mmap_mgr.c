@@ -1,4 +1,6 @@
 #define _GNU_SOURCE // To enable various non-standard GNU extensions.
+#include "mmap_mgr.h"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,10 +9,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "constants.h"
-#include "mmap_mgr.h"
-#include "profiling.h"
-#include "std_binding.h"
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/profiling.h>
+#include <mmap_allocator/std_binding.h>
 
 /*
 This function will reserve a region for later mmap use.

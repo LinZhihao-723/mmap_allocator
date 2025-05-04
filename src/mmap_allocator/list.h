@@ -1,12 +1,12 @@
-#ifndef LIST_H
-#define LIST_H
+#ifndef MMAP_ALLOCATOR_LIST_H
+#define MMAP_ALLOCATOR_LIST_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
-#include "constants.h"
-#include "std_binding.h"
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/std_binding.h>
 
 typedef struct list_node_base {
   struct list_node_base* prev;

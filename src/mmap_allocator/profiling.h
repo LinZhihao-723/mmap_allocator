@@ -1,13 +1,13 @@
-#ifndef PROFILING_H
-#define PROFILING_H
+#ifndef MMAP_ALLOCATOR_PROFILING_H
+#define MMAP_ALLOCATOR_PROFILING_H
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
 
-#include "constants.h"
-#include "default_config.h"
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/default_config.h>
 
 extern pthread_mutex_t profile_lock;
 extern FILE* profile_file;
