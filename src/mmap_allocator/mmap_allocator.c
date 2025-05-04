@@ -116,19 +116,19 @@ config_parameters() {
     mmap_heap_size = default_mmap_heap_size;
   }
 
-  const char* evn_bsize = getenv(env_mmap_alloctor_min_bsize);
+  const char* evn_bsize = getenv(env_mmap_allocator_min_bsize);
   if (evn_bsize) {
     mmap_alloctor_min_bsize = (size_t) strtoull(evn_bsize, NULL, 10);
     if (mmap_alloctor_min_bsize > mmap_heap_size) {
       fprintf(
-        stderr, 
-        "Config error: %s is not larger than the heap size.\n", 
-        env_mmap_alloctor_min_bsize
+              stderr,
+              "Config error: %s is not larger than the heap size.\n",
+              env_mmap_allocator_min_bsize
       );
       return false;
     }
   } else {
-    mmap_alloctor_min_bsize = default_mmap_alloctor_min_bsize;
+    mmap_alloctor_min_bsize = default_mmap_allocator_min_bsize;
   }
 
   const char* env_profile = getenv(env_profile_file_path);
@@ -149,9 +149,9 @@ config_parameters() {
     profile_frequency = (size_t) strtoull(env_profile_freq, NULL, 10);
     if (profile_frequency == 0) {
       fprintf(
-        stderr, 
-        "Config error: %s cannot be zero.\n", 
-        env_mmap_alloctor_min_bsize
+              stderr,
+              "Config error: %s cannot be zero.\n",
+              env_mmap_allocator_min_bsize
       );
       return false;
     }
@@ -229,7 +229,7 @@ LOCAL_HELPER void mmap_allocator_init() {
     return;
   }
 
-  fprintf(stderr, "MMap Allocator is successfully loaded.\n");
+  fprintf(stderr, "MMap Allocator is successfully loaded. Base address: %p\n", mmap_region_base);
   allocator_status = LOADED;
   GLOBAL_LOCK_RELEASE();
 }
