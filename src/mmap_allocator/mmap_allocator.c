@@ -9,6 +9,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <mimalloc.h>
+
 #include <mmap_allocator/constants.h>
 #include <mmap_allocator/default_config.h>
 #include <mmap_allocator/heap.h>
@@ -37,7 +39,7 @@ static enum allocator_status allocator_status = NOT_LOADED;
 // References binding to the original stdlib functions.
 void* (*std_malloc)(size_t) = NULL;
 void *(*std_calloc)(size_t, size_t) = NULL;
-void *(*std_free)(size_t) = NULL;
+void (*std_free)(void*) = NULL;
 void *(*std_realloc)(void *, size_t) = NULL;
 void *(*std_reallocarray)(void *, size_t, size_t) = NULL;
 
@@ -171,11 +173,11 @@ LOCAL_HELPER void mmap_allocator_init() {
   }
 
   // Getting the address of the default allocator APIs.
-  std_malloc = dlsym(RTLD_NEXT, "malloc");
-  std_free = dlsym(RTLD_NEXT, "free");
-  std_calloc = dlsym(RTLD_NEXT, "calloc");
-  std_realloc = dlsym(RTLD_NEXT, "realloc");
-  std_reallocarray = dlsym(RTLD_NEXT, "reallocarray");
+  std_malloc = mi_malloc;
+  std_free = mi_free;
+  std_calloc = mi_calloc;
+  std_realloc = mi_realloc;
+  std_reallocarray = mi_reallocarray;
 
   if (
     !std_malloc ||
