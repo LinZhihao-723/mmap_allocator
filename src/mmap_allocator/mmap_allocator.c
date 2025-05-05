@@ -343,7 +343,7 @@ void* malloc(size_t size) {
     mmap_allocator_init();
   }
 
-  if (allocator_status != LOADED || size < mmap_alloctor_min_bsize) {
+  if (allocator_status != LOADED) {
     return std_malloc(size);
   }
 
@@ -363,7 +363,7 @@ void* calloc(size_t num_elements, size_t element_size) {
   }
 
   const size_t total_size = num_elements * element_size;
-  if (allocator_status != LOADED || total_size < mmap_alloctor_min_bsize) {
+  if (allocator_status != LOADED) {
     return std_calloc(num_elements, element_size);
   }
 
@@ -431,10 +431,6 @@ void* realloc(void *addr, size_t size) {
   if (!realloc_buffer) {
     fprintf(stderr, "Failed to reallocate a buffer using std realloc.\n");
     return NULL;
-  }
-
-  if (size < mmap_alloctor_min_bsize) {
-    return realloc_buffer;
   }
 
   // const size_t alloc_size = CEILING_PAGE_SIZE(size);
