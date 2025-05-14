@@ -29,7 +29,7 @@ jobs:
 
       - name: "Format check"
         run: |
-          clang-format -i -style=file -fallback-style=none \
+          clang-format -i -fallback-style=none \
             --Werror --dry-run \
             src/mmap_allocator/*
 
