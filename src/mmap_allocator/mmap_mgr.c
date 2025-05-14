@@ -1,7 +1,10 @@
-#define _GNU_SOURCE // To enable various non-standard GNU extensions.
+#define _GNU_SOURCE  // To enable various non-standard GNU extensions.
 #include "mmap_mgr.h"
 
 #include <errno.h>
+#include <mmap_allocator/constants.h>
+#include <mmap_allocator/profiling.h>
+#include <mmap_allocator/std_binding.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,24 +12,20 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <mmap_allocator/constants.h>
-#include <mmap_allocator/profiling.h>
-#include <mmap_allocator/std_binding.h>
-
 /*
 This function will reserve a region for later mmap use.
 It does not map to an existing file.
 */
-void *mmap_reserve(const size_t size) {
-    void *addr = mmap(NULL, size, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+void* mmap_reserve(size_t const size) {
+    void* addr = mmap(NULL, size, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
     if (addr == MAP_FAILED) {
         return NULL;
     }
     return addr;
 }
 
-int mmap_maptemp(void *addr, const size_t size, char *template) {
-    char *filename = (char *)std_malloc(strlen(template) + 1);
+int mmap_maptemp(void* addr, size_t const size, char* template) {
+    char* filename = (char*)std_malloc(strlen(template) + 1);
     if (!filename) {
         return -1;
     }
@@ -52,9 +51,13 @@ int mmap_maptemp(void *addr, const size_t size, char *template) {
         return -4;
     }
 
-    void *ret_addr = mmap(addr, // Map to this address
-                          size, // With the given size.
-                          PROT_READ | PROT_WRITE, MAP_SHARED | MAP_FIXED, fd, 0);
+    void* ret_addr
+            = mmap(addr,  // Map to this address
+                   size,  // With the given size.
+                   PROT_READ | PROT_WRITE,
+                   MAP_SHARED | MAP_FIXED,
+                   fd,
+                   0);
     if (ret_addr == MAP_FAILED) {
         return -5;
     }
@@ -69,12 +72,14 @@ int mmap_maptemp(void *addr, const size_t size, char *template) {
     return 0;
 }
 
-int mmap_unmap(void *addr, const size_t size) {
-    void *ret_addr = mmap(addr, // Previous mapped address
-                          size, // With the given size.
-                          PROT_NONE, MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE,
-                          -1, // Reserved
-                          0);
+int mmap_unmap(void* addr, size_t const size) {
+    void* ret_addr
+            = mmap(addr,  // Previous mapped address
+                   size,  // With the given size.
+                   PROT_NONE,
+                   MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE,
+                   -1,  // Reserved
+                   0);
     if (ret_addr == MAP_FAILED) {
         return -1;
     }

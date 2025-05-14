@@ -20,16 +20,16 @@ typedef struct heap {
     size_t capacity;
     size_t size;
     list_t node_list;
-    list_node_t* node_array;
+    list_node_t *node_array;
 } heap_t;
 
-list_node_t heap_allocate(heap_t* heap, size_t const size);
-bool heap_free(heap_t* heap, list_node_t node);
-bool heap_init(heap_t* heap, uint8_t* addr, size_t const size);
+list_node_t heap_allocate(heap_t *heap, size_t const size);
+bool heap_free(heap_t *heap, list_node_t node);
+bool heap_init(heap_t *heap, uint8_t *addr, size_t const size);
 
-void FORCE_INLINE heap_check(heap_t* heap) {
+void FORCE_INLINE heap_check(heap_t *heap) {
 #if DEBUG_HEAP
-    list_t* list = &heap->node_list;
+    list_t *list = &heap->node_list;
     assert(!list->virtual_head->is_free && "Virtual head is dirty.");
     assert(!list->virtual_tail->is_free && "Virtual tail is dirty.");
     list_node_t curr = list->virtual_head->next;

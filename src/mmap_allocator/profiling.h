@@ -9,20 +9,20 @@
 #include <stdlib.h>
 
 extern pthread_mutex_t profile_lock;
-extern FILE* profile_file;
+extern FILE *profile_file;
 extern size_t profile_frequency;
 
 extern size_t num_mmap_file;
 extern size_t mmap_heap_total_size;
 
-#define PROFILE_LOCK_ACQUIRE() \
-    do { \
-        pthread_mutex_lock(&profile_lock); \
+#define PROFILE_LOCK_ACQUIRE()                                                                     \
+    do {                                                                                           \
+        pthread_mutex_lock(&profile_lock);                                                         \
     } while (0)
 
-#define PROFILE_LOCK_RELEASE() \
-    do { \
-        pthread_mutex_unlock(&profile_lock); \
+#define PROFILE_LOCK_RELEASE()                                                                     \
+    do {                                                                                           \
+        pthread_mutex_unlock(&profile_lock);                                                       \
     } while (0)
 
 void FORCE_INLINE profile_allocate(const size_t size) {
@@ -45,6 +45,6 @@ void FORCE_INLINE profile_deallocate(size_t const size) {
     PROFILE_LOCK_RELEASE();
 }
 
-void* profile_thread_entry(void* arg);
+void *profile_thread_entry(void *arg);
 
 #endif

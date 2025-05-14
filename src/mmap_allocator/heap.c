@@ -1,31 +1,32 @@
 #include "heap.h"
 
 #include <assert.h>
-#include <stdio.h>
-
 #include <mmap_allocator/list.h>
 #include <mmap_allocator/std_binding.h>
+#include <stdio.h>
 
 /*
 Since these functions are recursive, they cannot be inlined.
 Put them in the source code instead.
 */
 
-static void heap_heapify_down(heap_t *heap, const size_t idx);
-static void heap_heapify_up(heap_t *heap, const size_t idx);
+static void heap_heapify_down(heap_t* heap, size_t const idx);
+static void heap_heapify_up(heap_t* heap, size_t const idx);
 
-void LOCAL_HELPER heap_set_idx(heap_t *heap, const size_t idx, list_node_t node) {
+void LOCAL_HELPER heap_set_idx(heap_t* heap, size_t const idx, list_node_t node) {
     heap->node_array[idx] = node;
     node->idx = idx;
 }
 
-size_t LOCAL_HELPER heap_get_num_elements(heap_t *heap) { return heap->size - 1; }
+size_t LOCAL_HELPER heap_get_num_elements(heap_t* heap) {
+    return heap->size - 1;
+}
 
-size_t LOCAL_HELPER heap_compare_GT(heap_t *heap, const size_t l, const size_t r) {
+size_t LOCAL_HELPER heap_compare_GT(heap_t* heap, size_t const l, size_t const r) {
     return (heap->node_array[l]->size > heap->node_array[r]->size) ? l : r;
 }
 
-void LOCAL_HELPER heap_swap(heap_t *heap, const size_t a, const size_t b) {
+void LOCAL_HELPER heap_swap(heap_t* heap, size_t const a, size_t const b) {
     heap->node_array[a]->idx = b;
     heap->node_array[b]->idx = a;
     list_node_t temp = heap->node_array[a];
@@ -33,13 +34,13 @@ void LOCAL_HELPER heap_swap(heap_t *heap, const size_t a, const size_t b) {
     heap->node_array[b] = temp;
 }
 
-void LOCAL_HELPER heap_remove_idx(heap_t *heap, const size_t idx) {
+void LOCAL_HELPER heap_remove_idx(heap_t* heap, size_t const idx) {
     if (!(idx > 0 && idx < heap->size && "Heap remove invalid idx.")) {
         fprintf(stderr, "idx: %ld\n", idx);
         assert(0);
     }
 
-    const size_t heap_elements = heap_get_num_elements(heap);
+    size_t const heap_elements = heap_get_num_elements(heap);
     if (heap_elements == idx) {
         heap->size -= 1;
         heap->node_array[idx]->idx = HEAP_IDX_NULL;
@@ -52,7 +53,7 @@ void LOCAL_HELPER heap_remove_idx(heap_t *heap, const size_t idx) {
     heap_heapify_down(heap, idx);
 }
 
-list_node_t LOCAL_HELPER heap_get_root(heap_t *heap) {
+list_node_t LOCAL_HELPER heap_get_root(heap_t* heap) {
     if (heap->size <= HEAP_IDX_ROOT) {
         return NULL;
     }
@@ -60,11 +61,11 @@ list_node_t LOCAL_HELPER heap_get_root(heap_t *heap) {
 }
 
 // Insert a new node to the heap with heap property maintained.
-bool LOCAL_HELPER heap_insert(heap_t *heap, list_node_t node) {
+bool LOCAL_HELPER heap_insert(heap_t* heap, list_node_t node) {
     if (heap->size == heap->capacity) {
         // Needs to expand.
-        list_node_t *new_array =
-            std_realloc(heap->node_array, sizeof(list_node_base_t) * heap->capacity * 2);
+        list_node_t* new_array
+                = std_realloc(heap->node_array, sizeof(list_node_base_t) * heap->capacity * 2);
         if (new_array == NULL) {
             fprintf(stderr, "Error: failed to allocate more memory for internal heap.\n");
             return false;
@@ -84,9 +85,9 @@ bool LOCAL_HELPER heap_insert(heap_t *heap, list_node_t node) {
 /*
 Heapify downward. This happens when we replace a node by a smaller number.
 */
-static void heap_heapify_down(heap_t *heap, const size_t idx) {
-    const size_t left_idx = HEAP_GET_LEFT_IDX(idx);
-    const size_t right_idx = HEAP_GET_RIGHT_IDX(idx);
+static void heap_heapify_down(heap_t* heap, size_t const idx) {
+    size_t const left_idx = HEAP_GET_LEFT_IDX(idx);
+    size_t const right_idx = HEAP_GET_RIGHT_IDX(idx);
     size_t largest_idx = idx;
     if (left_idx < heap->size) {
         largest_idx = heap_compare_GT(heap, largest_idx, left_idx);
@@ -104,18 +105,19 @@ static void heap_heapify_down(heap_t *heap, const size_t idx) {
 /*
 Heapify upward. This happens when we replace a node by a larger number.
 */
-static void heap_heapify_up(heap_t *heap, const size_t idx) {
-    if (idx <= HEAP_IDX_ROOT)
+static void heap_heapify_up(heap_t* heap, size_t const idx) {
+    if (idx <= HEAP_IDX_ROOT) {
         return;
+    }
 
-    const size_t parent = HEAP_GET_PARENT_IDX(idx);
+    size_t const parent = HEAP_GET_PARENT_IDX(idx);
     if (heap_compare_GT(heap, idx, parent) != parent) {
         heap_swap(heap, idx, parent);
         heap_heapify_up(heap, parent);
     }
 }
 
-list_node_t heap_allocate(heap_t *heap, const size_t size) {
+list_node_t heap_allocate(heap_t* heap, size_t const size) {
     list_node_t root = heap_get_root(heap);
     if (!root) {
         return NULL;
@@ -128,9 +130,9 @@ list_node_t heap_allocate(heap_t *heap, const size_t size) {
 
     // First, try to find the smallest node on the top of the heap >= size
     list_node_t victim = root;
-    const size_t heap_size = heap->size;
-    const size_t left_idx = HEAP_GET_LEFT_IDX(HEAP_IDX_ROOT);
-    const size_t right_idx = HEAP_GET_RIGHT_IDX(HEAP_IDX_ROOT);
+    size_t const heap_size = heap->size;
+    size_t const left_idx = HEAP_GET_LEFT_IDX(HEAP_IDX_ROOT);
+    size_t const right_idx = HEAP_GET_RIGHT_IDX(HEAP_IDX_ROOT);
     list_node_t left = left_idx < heap_size ? heap->node_array[left_idx] : NULL;
     list_node_t right = right_idx < heap_size ? heap->node_array[right_idx] : NULL;
 
@@ -149,9 +151,14 @@ list_node_t heap_allocate(heap_t *heap, const size_t size) {
     }
 
     // The block is larger than what's being asked. Need to split...
-    list_node_t ret_node =
-        list_create_node(victim->prev, victim, victim->addr, size, HEAP_IDX_NULL,
-                         false); // Notice that this is the only place that we create new node.
+    list_node_t ret_node = list_create_node(
+            victim->prev,
+            victim,
+            victim->addr,
+            size,
+            HEAP_IDX_NULL,
+            false
+    );  // Notice that this is the only place that we create new node.
     if (!ret_node) {
         // Running out of memory to allocate node...
         // But we can still return the allocated block
@@ -168,7 +175,7 @@ list_node_t heap_allocate(heap_t *heap, const size_t size) {
     return ret_node;
 }
 
-bool heap_free(heap_t *heap, list_node_t node) {
+bool heap_free(heap_t* heap, list_node_t node) {
     // The idea is that we want to merge internal free blocks,
     // and try to avoid insert new node into the heap.
     assert(!node->is_free && "The current node must not be free already");
@@ -214,8 +221,8 @@ bool heap_free(heap_t *heap, list_node_t node) {
     }
 }
 
-bool heap_init(heap_t *heap, uint8_t *addr, const size_t size) {
-    list_node_t *array = (list_node_t *)std_malloc(sizeof(list_node_t) * INIT_HEAP_CAPACITY);
+bool heap_init(heap_t* heap, uint8_t* addr, size_t const size) {
+    list_node_t* array = (list_node_t*)std_malloc(sizeof(list_node_t) * INIT_HEAP_CAPACITY);
     if (!array) {
         fprintf(stderr, "Error: failed to allocate memory for the heap.\n");
         return false;
