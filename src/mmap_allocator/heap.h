@@ -1,15 +1,11 @@
 #ifndef MMAP_ALLOCATOR_HEAP_H
 #define MMAP_ALLOCATOR_HEAP_H
 
-#include <stdbool.h>
-#include <pthread.h>
-
-#include "list.h"
-#include "std_binding.h"
-
 #include <mmap_allocator/constants.h>
 #include <mmap_allocator/list.h>
 #include <mmap_allocator/std_binding.h>
+#include <pthread.h>
+#include <stdbool.h>
 
 #define INIT_HEAP_CAPACITY 8
 
@@ -21,41 +17,40 @@
 #define HEAP_IDX_ROOT 1
 
 typedef struct heap {
-  size_t capacity;
-  size_t size;
-  list_t node_list;
-  list_node_t* node_array;
+    size_t capacity;
+    size_t size;
+    list_t node_list;
+    list_node_t* node_array;
 } heap_t;
 
-list_node_t heap_allocate(heap_t* heap, const size_t size);
+list_node_t heap_allocate(heap_t* heap, size_t const size);
 bool heap_free(heap_t* heap, list_node_t node);
-bool heap_init(heap_t* heap, uint8_t* addr, const size_t size);
+bool heap_init(heap_t* heap, uint8_t* addr, size_t const size);
 
-void FORCE_INLINE
-heap_check(heap_t* heap) {
+void FORCE_INLINE heap_check(heap_t* heap) {
 #if DEBUG_HEAP
-  list_t* list = &heap->node_list;
-  assert(!list->virtual_head->is_free && "Virtual head is dirty.");
-  assert(!list->virtual_tail->is_free && "Virtual tail is dirty.");
-  list_node_t curr = list->virtual_head->next;
-  list_node_t end = list->virtual_tail;
-  while (curr != end) {
-    assert(curr);
-    if (curr->is_free) {
-      if (!(curr->idx > 0 && curr->idx < heap->size)) {
-        fprintf(stderr, "Idx: %ld; Addr: %p\n", curr->idx, curr);
-        assert(0 && "Out of bound!");
-      }
-    } else {
-      assert(curr->idx == 0 && "Invalid null heap idx.");
+    list_t* list = &heap->node_list;
+    assert(!list->virtual_head->is_free && "Virtual head is dirty.");
+    assert(!list->virtual_tail->is_free && "Virtual tail is dirty.");
+    list_node_t curr = list->virtual_head->next;
+    list_node_t end = list->virtual_tail;
+    while (curr != end) {
+        assert(curr);
+        if (curr->is_free) {
+            if (!(curr->idx > 0 && curr->idx < heap->size)) {
+                fprintf(stderr, "Idx: %ld; Addr: %p\n", curr->idx, curr);
+                assert(0 && "Out of bound!");
+            }
+        } else {
+            assert(curr->idx == 0 && "Invalid null heap idx.");
+        }
+        curr = curr->next;
     }
-    curr = curr->next;
-  }
-  for (int i = 1; i < heap->size; ++i) {
-    assert(heap->node_array[i] && "Node array being NULL.");
-    assert(heap->node_array[i]->is_free && "Heap not clean.");
-    assert(heap->node_array[i]->idx == i && "Idx mismatch.");
-  }
+    for (int i = 1; i < heap->size; ++i) {
+        assert(heap->node_array[i] && "Node array being NULL.");
+        assert(heap->node_array[i]->is_free && "Heap not clean.");
+        assert(heap->node_array[i]->idx == i && "Idx mismatch.");
+    }
 #endif
 }
 

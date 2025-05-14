@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-void* mmap_reserve(const size_t size);
-int mmap_maptemp(void* addr, const size_t size, char* template);
-int mmap_unmap(void* addr, const size_t size);
+void* mmap_reserve(size_t const size);
+int mmap_maptemp(void* addr, size_t const size, char* template);
+int mmap_unmap(void* addr, size_t const size);
 
 #endif

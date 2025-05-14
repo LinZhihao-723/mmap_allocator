@@ -12,8 +12,8 @@ extern char* const env_naming_template;
 extern char* const env_profile_file_path;
 extern char* const env_profile_frequency;
 
-extern const size_t default_mmap_heap_size;
-extern const size_t default_mmap_allocator_min_bsize;
-extern char* const  default_naming_template;
+extern size_t const default_mmap_heap_size;
+extern size_t const default_mmap_allocator_min_bsize;
+extern char* const default_naming_template;
 
 #endif
